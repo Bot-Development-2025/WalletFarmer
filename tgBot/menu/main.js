@@ -1,6 +1,8 @@
 import { InlineKeyboard } from "grammy";
 
 import { addKeyEvent } from "./keyEvent.js";
+import { returnToSetting } from "./settings/settings.js";
+import { addCallbackQueries as addSettingCallbackQueries } from "./settings/settings.js";
 import { returnToSolana } from "./solana/solana.js";
 import { addCallbackQueries as addSolanaCallbackQueries } from "./solana/solana.js";
 import { returnToUniswap } from "./uniswap/uniswap.js";
@@ -8,7 +10,13 @@ import { addCallbackQueries as addUniswapCallbackQueries } from "./uniswap/unisw
 
 const CAPTION_MAIN = "👋 The Volume Bot welcomes you!\n💡Detailed info for this bot\n";
 
-const mainKeyboard = new InlineKeyboard().row().text("🦄UniswapV2🦄", "UniswapV2").row().text("🚀Solana🚀", "Solana");
+const mainKeyboard = new InlineKeyboard()
+  .row()
+  .text("🦄UniswapV2🦄", "UniswapV2")
+  .row()
+  .text("🚀Solana🚀", "Solana")
+  .row()
+  .text("👤Setting👤", "Setting");
 
 const returnToMain = async (tgBot, ctx, isCallbackQuery = false) => {
   if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
@@ -33,10 +41,15 @@ export const addCallbackQueries = (tgBot) => {
   tgBot.callbackQuery("Solana", async (ctx) => {
     await returnToSolana(tgBot, ctx);
   });
+
+  tgBot.callbackQuery("Setting", async (ctx) => {
+    await returnToSetting(tgBot, ctx);
+  });
   tgBot.callbackQuery("back_to_first", async (ctx) => {
     await returnToMain(tgBot, ctx, true);
   });
   addUniswapCallbackQueries(tgBot);
   addSolanaCallbackQueries(tgBot);
+  addSettingCallbackQueries(tgBot);
   addKeyEvent(tgBot);
 };
