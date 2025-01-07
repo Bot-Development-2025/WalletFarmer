@@ -1,5 +1,6 @@
 import { InlineKeyboard } from "grammy";
 
+import SolanaWallet from "../../../model/SolanaWallet.js";
 import { checkSolanaMainWallet } from "../../../solana/checkMainWallet.js";
 import { createSolanaMainWallet } from "../../../solana/createMainWallet.js";
 import { retrieveMainWalletAddress } from "../../../solana/retrieveMainWalletAddress.js";
@@ -59,8 +60,16 @@ export const addCallbackQueries = async (tgBot) => {
   });
   tgBot.callbackQuery("solana_input_check_main_wallet", async (ctx) => {
     try {
+      var wlt = await SolanaWallet.findOne({ createdBy: ctx.from.username, isMain: true });
       var retVal = await checkSolanaMainWallet(ctx);
-      await ctx.reply(retVal);
+      await ctx.reply(
+        retVal,
+        wlt
+          ? {
+              reply_markup: new InlineKeyboard().text("Export Private Key", `solana_export_private_key_${wlt._id}`),
+            }
+          : {}
+      );
     } catch (error) {
       await ctx.reply(`Error: ${error.message || error}`);
     } finally {

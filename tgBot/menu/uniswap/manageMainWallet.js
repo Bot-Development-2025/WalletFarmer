@@ -50,8 +50,16 @@ export const addCallbackQueries = async (tgBot) => {
   });
   tgBot.callbackQuery("uniswap_input_check_main_wallet", async (ctx) => {
     try {
+      const wlt = await EtherWallet.findOne({ createdBy: ctx.from.username, isMain: true });
       var retVal = await checkMainWallet(ctx);
-      await ctx.reply(retVal);
+      await ctx.reply(
+        retVal,
+        wlt
+          ? {
+              reply_markup: new InlineKeyboard().text("Export Private Key", `uniswap_export_private_key_${wlt._id}`),
+            }
+          : {}
+      );
     } catch (error) {
       await ctx.reply(`Error: ${error.message || error}`);
     } finally {

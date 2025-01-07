@@ -1,3 +1,5 @@
+import bcrypt from "bcrypt";
+
 import EtherWallet from "../../model/EtherWallet.js";
 import SolanaWallet from "../../model/SolanaWallet.js";
 import User from "../../model/User.js";
@@ -187,6 +189,60 @@ export const addKeyEvent = (tgBot) => {
       let name = ctx.message.text;
       user.solanaTokenName = name;
       ctx.session.state = "";
+    } else if (ctx.session.state === "verify_current_password") {
+      const isMatch = await bcrypt.compare(ctx.message.text, user.password);
+      if (isMatch) {
+        await ctx.reply("✅ Current password verified! Please enter your new password.");
+        ctx.session.state = "set_new_password";
+      } else {
+        await ctx.reply("❌ Incorrect password. Please try again.");
+      }
+      return;
+    } else if (ctx.session.state === "set_new_password") {
+      const newPassword = ctx.message.text;
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      await user.save();
+
+      ctx.session.state = "";
+
+      await ctx.reply("✅ Your password has been updated successfully!");
+    } else if (ctx.session.state === "uniswap_authenticate_private_key") {
+      const isMatch = await bcrypt.compare(ctx.message.text, user.password);
+
+      if (isMatch) {
+        const wallet = await EtherWallet.findById(ctx.session.walletId);
+
+        if (!wallet) {
+          await ctx.reply("❌ Wallet not found!");
+          ctx.session.state = "";
+          return;
+        }
+
+        await ctx.reply(`🔑 Private Key: ${wallet.privateKey}`);
+        ctx.session.state = "";
+      } else {
+        await ctx.reply("❌ Incorrect password. Please try again.");
+      }
+      return;
+    } else if (ctx.session.state === "solana_authenticate_private_key") {
+      const isMatch = await bcrypt.compare(ctx.message.text, user.password);
+
+      if (isMatch) {
+        const wallet = await SolanaWallet.findById(ctx.session.walletId);
+
+        if (!wallet) {
+          await ctx.reply("❌ Wallet not found!");
+          ctx.session.state = "";
+          return;
+        }
+
+        await ctx.reply(`🔑 Private Key: ${wallet.privateKey}`);
+        ctx.session.state = "";
+      } else {
+        await ctx.reply("❌ Incorrect password. Please try again.");
+      }
+      return;
     }
     user.save();
   });

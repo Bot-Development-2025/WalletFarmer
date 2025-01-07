@@ -5,6 +5,7 @@ import User from "../../../model/User.js";
 import { checkSubWallet } from "../../../uniswap/checkSubWallet.js";
 import { depositToSubWallet } from "../../../uniswap/depositToSubWallet.js";
 import { wrapToMainWallet } from "../../../uniswap/wrapToMainWallet.js";
+import { returnToSetting } from "../settings/settings.js";
 
 const CAPTION_UNISWAP_CREATE =
   "❓How many wallet would you like to create?\n💡We will create randomized wallet for you.";
@@ -77,10 +78,27 @@ export const addCallbackQueries = async (tgBot) => {
     for (let i = 0; i < wallets.length; i++) {
       let wallet = wallets[i];
       try {
-        await ctx.reply(await checkSubWallet(wallet.privateKey));
+        await ctx.reply(await checkSubWallet(wallet.privateKey), {
+          reply_markup: new InlineKeyboard().text("Export Private Key", `uniswap_export_private_key_${wallet._id}`),
+        });
       } catch (error) {
         await ctx.reply(`Error: ${error.message || error}`);
       }
+    }
+    await ctx.answerCallbackQuery();
+  });
+
+  tgBot.callbackQuery(/^uniswap_export_private_key_(.+)$/, async (ctx) => {
+    const walletId = ctx.match[1];
+    ctx.session.state = "uniswap_authenticate_private_key";
+    ctx.session.walletId = walletId;
+
+    const user = await User.findOne({ username: ctx.from.username });
+    if (!user.password) {
+      await ctx.reply("🔑 Please set your password first.");
+      await returnToSetting(tgBot, ctx);
+    } else {
+      await ctx.reply("🔒 Please enter your password to authenticate.");
     }
     await ctx.answerCallbackQuery();
   });
