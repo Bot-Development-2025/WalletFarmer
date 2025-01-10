@@ -51,7 +51,7 @@ export const swapETHToToken = async (
 
     // Wait for the transaction to be mined
     await swapTransaction.wait();
-    return `Transaction Hash: http://sepolia.etherscan.io/tx/${swapTransaction.hash}`;
+    return `Transaction Hash: http://etherscan.io/tx/${swapTransaction.hash}`;
   } catch (error) {
     // Handle errors
     console.error("Error occurred during ETH to token swap:", error);
@@ -104,7 +104,7 @@ export const swapTokenToETH = async (
     // Wait for the transaction to be mined
     await swapTransaction.wait();
 
-    return `Transaction Hash: http://sepolia.etherscan.io/tx/${swapTransaction.hash}\n`;
+    return `Transaction Hash: http://etherscan.io/tx/${swapTransaction.hash}\n`;
   } catch (error) {
     // Handle errors
     console.error("Error occurred during token to ETH swap:", error);
