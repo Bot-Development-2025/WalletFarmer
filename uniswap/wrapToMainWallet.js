@@ -23,5 +23,5 @@ export const wrapToMainWallet = async (privateKey, mainWalletPrivateKey) => {
     });
     await transaction.wait();
     console.log(`https://sepolia.etherscan.io/tx/${transaction.hash}`);
-    return `Successfully transfer ${ethers.formatEther(balance)} from ${wallet.address} to ${mainWallet.address} on https://sepolia.etherscan.io/tx/${transaction.hash}\n`;
+    return `Successfully transfer ${ethers.formatEther(balance)} from ${wallet.address} to ${mainWallet.address} on https://etherscan.io/tx/${transaction.hash}\n`;
 }

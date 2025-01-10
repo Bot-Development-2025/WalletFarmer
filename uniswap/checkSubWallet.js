@@ -23,7 +23,7 @@ export const checkSubWallet = async (privateKey) => {
     var wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize the EBT contract instance
-    const ebtContract = new ethers.Contract(USDC_ADDRESS, EBT_ABI, provider);
+    // const ebtContract = new ethers.Contract(USDC_ADDRESS, EBT_ABI, provider);
 
     // Fetch the Ether balance of the wallet
     const ethBalance = ethers.formatEther(
@@ -31,13 +31,13 @@ export const checkSubWallet = async (privateKey) => {
     );
 
     // Fetch the EBT token balance of the wallet
-    const usdcBalance = ethers.formatEther(
-      await ebtContract.balanceOf(wallet.address),
-      6
-    );
+    // const usdcBalance = ethers.formatEther(
+    //   await ebtContract.balanceOf(wallet.address),
+    //   6
+    // );
 
     // Return the wallet details and balances
-    return `-Address: ${wallet.address}\n\nEther Balance: ${ethBalance} ETH\n\nUSDC Balance: ${usdcBalance} USDC`;
+    return `-Address: ${wallet.address}\n\nEther Balance: ${ethBalance} ETH`;
   } catch (error) {
     console.log(error);
     // Handle invalid private key format error
