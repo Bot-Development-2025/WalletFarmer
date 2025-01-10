@@ -10,14 +10,17 @@ const SettingInputMainKeyboard = new InlineKeyboard()
   .row()
   .text("⬅️ Back", "back_to_first");
 
-export const returnToSetting = async (tgBot, ctx) => {
-  if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
+export const returnToSetting = async (tgBot, ctx, isCallbackQuery = false) => {
+  if (ctx.session.previousMessage)
+    tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
   const message = await ctx.replyWithPhoto(process.env.LOGO_SETTING, {
     caption: CAPTION_SETTING,
     reply_markup: SettingInputMainKeyboard,
   });
   ctx.session.previousMessage = message.message_id;
-  await ctx.answerCallbackQuery();
+  if (isCallbackQuery) {
+    await ctx.answerCallbackQuery();
+  }
 };
 
 export const addCallbackQueries = (tgBot) => {

@@ -8,7 +8,8 @@ import { addCallbackQueries as addSolanaCallbackQueries } from "./solana/solana.
 import { returnToUniswap } from "./uniswap/uniswap.js";
 import { addCallbackQueries as addUniswapCallbackQueries } from "./uniswap/uniswap.js";
 
-const CAPTION_MAIN = "👋 The Volume Bot welcomes you!\n💡Detailed info for this bot\n";
+const CAPTION_MAIN =
+  "👋 The Volume Bot welcomes you!\n💡Detailed info for this bot\n";
 
 const mainKeyboard = new InlineKeyboard()
   .row()
@@ -19,7 +20,8 @@ const mainKeyboard = new InlineKeyboard()
   .text("👤Setting👤", "Setting");
 
 const returnToMain = async (tgBot, ctx, isCallbackQuery = false) => {
-  if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
+  if (ctx.session.previousMessage)
+    tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
   const message = await ctx.replyWithPhoto(process.env.LOGO_MAIN, {
     caption: CAPTION_MAIN,
     reply_markup: mainKeyboard,
@@ -32,18 +34,18 @@ const returnToMain = async (tgBot, ctx, isCallbackQuery = false) => {
 
 export const addCallbackQueries = (tgBot) => {
   tgBot.command("start", async (ctx) => {
-    await returnToMain(tgBot, ctx);
+    await returnToMain(tgBot, ctx, true);
   });
   tgBot.callbackQuery("UniswapV2", async (ctx) => {
-    await returnToUniswap(tgBot, ctx);
+    await returnToUniswap(tgBot, ctx, true);
   });
 
   tgBot.callbackQuery("Solana", async (ctx) => {
-    await returnToSolana(tgBot, ctx);
+    await returnToSolana(tgBot, ctx, true);
   });
 
   tgBot.callbackQuery("Setting", async (ctx) => {
-    await returnToSetting(tgBot, ctx);
+    await returnToSetting(tgBot, ctx, true);
   });
   tgBot.callbackQuery("back_to_first", async (ctx) => {
     await returnToMain(tgBot, ctx, true);

@@ -20,14 +20,16 @@ const UniswapKeyboard = new InlineKeyboard()
   .row()
   .text("Back", "back_to_first");
 
-export const returnToUniswap = async (tgBot, ctx) => {
+export const returnToUniswap = async (tgBot, ctx, isCallbackQuery = false) => {
   if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
   const message = await ctx.replyWithPhoto(process.env.LOGO_UNISWAP_VOLUME, {
     caption: CAPTION_UNISWAP,
     reply_markup: UniswapKeyboard,
   });
   ctx.session.previousMessage = message.message_id;
-  await ctx.answerCallbackQuery();
+  if (isCallbackQuery) {
+    await ctx.answerCallbackQuery();
+  }
 };
 
 export const addCallbackQueries = (tgBot) => {
@@ -38,10 +40,10 @@ export const addCallbackQueries = (tgBot) => {
     await returnToManageSubWallet(tgBot, ctx, true);
   });
   tgBot.callbackQuery("uniswap_swap_on_sub_wallet", async (ctx) => {
-    await returnToSwapInSubWallet(tgBot, ctx);
+    await returnToSwapInSubWallet(tgBot, ctx, true);
   });
   tgBot.callbackQuery("back_to_uniswap", async (ctx) => {
-    await returnToUniswap(tgBot, ctx);
+    await returnToUniswap(tgBot, ctx, true);
   });
   addMainCallbackQueries(tgBot);
   addSubCallbackQueries(tgBot);

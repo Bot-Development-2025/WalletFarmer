@@ -20,14 +20,17 @@ const SolanaInputMainKeyboard = new InlineKeyboard()
   .row()
   .text("Back To Main", "back_to_first");
 
-export const returnToSolana = async (tgBot, ctx) => {
-  if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
+export const returnToSolana = async (tgBot, ctx, isCallbackQuery = false) => {
+  if (ctx.session.previousMessage)
+    tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
   const message = await ctx.replyWithPhoto(process.env.LOGO_SOLANA_VOLUME, {
     caption: CAPTION_SOLANA,
     reply_markup: SolanaInputMainKeyboard,
   });
   ctx.session.previousMessage = message.message_id;
-  await ctx.answerCallbackQuery();
+  if (isCallbackQuery) {
+    await ctx.answerCallbackQuery();
+  }
 };
 
 export const addCallbackQueries = (tgBot) => {
@@ -38,10 +41,10 @@ export const addCallbackQueries = (tgBot) => {
     await returnToManageSubWallet(tgBot, ctx, true);
   });
   tgBot.callbackQuery("solana_input_swap_on_sub_wallets", async (ctx) => {
-    returnToSwapInSubWallet(tgBot, ctx);
+    returnToSwapInSubWallet(tgBot, ctx, true);
   });
   tgBot.callbackQuery("back_to_solana", async (ctx) => {
-    await returnToSolana(tgBot, ctx);
+    await returnToSolana(tgBot, ctx, true);
   });
   addMainCallbackQueries(tgBot);
   addSubCallbackQueries(tgBot);
