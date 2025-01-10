@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import EBT_ABI from "../abis/ebt.js";
-import { EBT_ADDRESS, provider } from "./provider.js";
+import { USDC_ADDRESS, provider } from "./provider.js";
 
 /**
  * This function checks the balance of a sub wallet by providing its private key.
@@ -23,26 +23,38 @@ export const checkSubWallet = async (privateKey) => {
     var wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize the EBT contract instance
-    const ebtContract = new ethers.Contract(EBT_ADDRESS, EBT_ABI, provider);
+    const ebtContract = new ethers.Contract(USDC_ADDRESS, EBT_ABI, provider);
 
     // Fetch the Ether balance of the wallet
-    const ethBalance = ethers.formatEther(await provider.getBalance(wallet.address));
+    const ethBalance = ethers.formatEther(
+      await provider.getBalance(wallet.address)
+    );
 
     // Fetch the EBT token balance of the wallet
-    const ebtBalance = ethers.formatEther(await ebtContract.balanceOf(wallet.address));
+    const usdcBalance = ethers.formatEther(
+      await ebtContract.balanceOf(wallet.address),
+      6
+    );
 
     // Return the wallet details and balances
-    return `-Address: ${wallet.address}\n\nEther Balance: ${ethBalance} ETH\n\nEBT Balance: ${ebtBalance} EBT`;
+    return `-Address: ${wallet.address}\n\nEther Balance: ${ethBalance} ETH\n\nUSDC Balance: ${usdcBalance} USDC`;
   } catch (error) {
     console.log(error);
     // Handle invalid private key format error
     if (error.message === "Invalid private key format.") {
-      throw new Error("The private key provided is invalid. Please check the format.");
+      throw new Error(
+        "The private key provided is invalid. Please check the format."
+      );
     }
 
     // Handle network errors (e.g., provider connection issues)
-    if (error.message.includes("network") || error.message.includes("ECONNREFUSED")) {
-      throw new Error("Network error. Unable to fetch wallet balances at the moment.");
+    if (
+      error.message.includes("network") ||
+      error.message.includes("ECONNREFUSED")
+    ) {
+      throw new Error(
+        "Network error. Unable to fetch wallet balances at the moment."
+      );
     }
 
     // Handle any errors related to contract interactions or balance fetching
