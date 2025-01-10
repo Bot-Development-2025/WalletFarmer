@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 import EBT_ABI from "../abis/ebt.js";
 import EtherWallet from "../model/EtherWallet.js";
-import { EBT_ADDRESS, provider } from "./provider.js";
+import { USDC_ADDRESS, provider } from "./provider.js";
 
 /**
  * This function checks the balance of the main wallet associated with the user.
@@ -15,7 +15,10 @@ import { EBT_ADDRESS, provider } from "./provider.js";
 export const checkMainWallet = async (ctx) => {
   try {
     // Retrieve the main wallet for the user
-    const wlt = await EtherWallet.findOne({ createdBy: ctx.from.username, isMain: true });
+    const wlt = await EtherWallet.findOne({
+      createdBy: ctx.from.username,
+      isMain: true,
+    });
     if (!wlt) {
       // If no main wallet exists, return an appropriate message
       return "Please create a main wallet first.";
@@ -32,10 +35,12 @@ export const checkMainWallet = async (ctx) => {
     const wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize the EBT contract
-    const ebtContract = new ethers.Contract(EBT_ADDRESS, EBT_ABI, provider);
+    const ebtContract = new ethers.Contract(USDC_ADDRESS, EBT_ABI, provider);
 
     // Fetch the Ether balance of the wallet
-    const ethBalance = ethers.formatEther(await provider.getBalance(wallet.address));
+    const ethBalance = ethers.formatEther(
+      await provider.getBalance(wallet.address)
+    );
 
     // Return the wallet details and balances
     return `-Address: ${wallet.address}\n\n-Ether Balance: ${ethBalance} ETH\n\n`;
@@ -45,7 +50,10 @@ export const checkMainWallet = async (ctx) => {
       throw new Error("Wallet does not have a valid private key.");
     }
 
-    if (error.message.includes("ECONNREFUSED") || error.message.includes("network")) {
+    if (
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("network")
+    ) {
       throw new Error("Network error. Unable to fetch balances at the moment.");
     }
 
