@@ -23,8 +23,13 @@ const UniswapInputWalletCountKeyboard = new InlineKeyboard()
   .row()
   .text("Back", "back_to_uniswap");
 
-export const returnToManageSubWallet = async (tgBot, ctx, isCallbackQuery = false) => {
-  if (ctx.session.previousMessage) tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
+export const returnToManageSubWallet = async (
+  tgBot,
+  ctx,
+  isCallbackQuery = false
+) => {
+  if (ctx.session.previousMessage)
+    tgBot.api.deleteMessage(ctx.chat.id, ctx.session.previousMessage);
   const message = await ctx.replyWithPhoto(process.env.LOGO_UNISWAP_VOLUME, {
     caption: CAPTION_UNISWAP_CREATE,
     reply_markup: UniswapInputWalletCountKeyboard,
@@ -43,34 +48,61 @@ export const addCallbackQueries = async (tgBot) => {
   });
   tgBot.callbackQuery("uniswap_default_amount", async (ctx) => {
     ctx.session.state = "uniswap_default_amount";
-    await ctx.reply("Please input the default amount that will be sent from user wallet to each generated wallets");
+    await ctx.reply(
+      "Please input the default amount that will be sent from user wallet to each generated wallets"
+    );
     await ctx.answerCallbackQuery();
   });
   tgBot.callbackQuery("uniswap_deposite_sub_wallets", async (ctx) => {
     await ctx.reply("Please wait for a moment");
     var user = await User.findOne({ username: ctx.from.username });
-    var mainWallet = await EtherWallet.findOne({ createdBy: ctx.from.username, isMain: true });
-    var wallets = await EtherWallet.find({ createdBy: ctx.from.username, isMain: false });
-    if (wallets == null || wallets.length == 0) return await ctx.reply("There is no sub wallets to deposit");
+    var mainWallet = await EtherWallet.findOne({
+      createdBy: ctx.from.username,
+      isMain: true,
+    });
+    var wallets = await EtherWallet.find({
+      createdBy: ctx.from.username,
+      isMain: false,
+    });
+    if (wallets == null || wallets.length == 0)
+      return await ctx.reply("There is no sub wallets to deposit");
     for (let i = 0; i < wallets.length; i++) {
       let wallet = wallets[i];
-      await ctx.reply(await depositToSubWallet(wallet.privateKey, mainWallet.privateKey, user.defaultAmountForEther));
+      await ctx.reply(
+        await depositToSubWallet(
+          wallet.privateKey,
+          mainWallet.privateKey,
+          user.defaultAmountForEther
+        )
+      );
     }
     await ctx.answerCallbackQuery();
   });
   tgBot.callbackQuery("uniswap_input_wrap_sub_wallets", async (ctx) => {
     await ctx.reply("Please wait for a moment");
-    var mainWallet = await EtherWallet.findOne({ createdBy: ctx.from.username, isMain: true });
-    var wallets = await EtherWallet.find({ createdBy: ctx.from.username, isMain: false });
-    if (wallets == null || wallets.length == 0) return await ctx.reply("There is no sub wallets to wrap");
+    var mainWallet = await EtherWallet.findOne({
+      createdBy: ctx.from.username,
+      isMain: true,
+    });
+    var wallets = await EtherWallet.find({
+      createdBy: ctx.from.username,
+      isMain: false,
+    });
+    if (wallets == null || wallets.length == 0)
+      return await ctx.reply("There is no sub wallets to wrap");
     for (let i = 0; i < wallets.length; i++) {
       let wallet = wallets[i];
-      await ctx.reply(await wrapToMainWallet(wallet.privateKey, mainWallet.privateKey));
+      await ctx.reply(
+        await wrapToMainWallet(wallet.privateKey, mainWallet.privateKey)
+      );
     }
     await ctx.answerCallbackQuery();
   });
   tgBot.callbackQuery("uniswap_check_sub_wallets", async (ctx) => {
-    var wallets = await EtherWallet.find({ createdBy: ctx.from.username, isMain: false });
+    var wallets = await EtherWallet.find({
+      createdBy: ctx.from.username,
+      isMain: false,
+    });
     if (wallets == null || wallets.length == 0) {
       await ctx.reply("There is no sub wallets to check");
       return await ctx.answerCallbackQuery();
@@ -79,7 +111,10 @@ export const addCallbackQueries = async (tgBot) => {
       let wallet = wallets[i];
       try {
         await ctx.reply(await checkSubWallet(wallet.privateKey), {
-          reply_markup: new InlineKeyboard().text("Export Private Key", `uniswap_export_private_key_${wallet._id}`),
+          reply_markup: new InlineKeyboard().text(
+            "Export Private Key",
+            `uniswap_export_private_key_${wallet._id}`
+          ),
         });
       } catch (error) {
         await ctx.reply(`Error: ${error.message || error}`);
@@ -96,7 +131,7 @@ export const addCallbackQueries = async (tgBot) => {
     const user = await User.findOne({ username: ctx.from.username });
     if (!user.password) {
       await ctx.reply("🔑 Please set your password first.");
-      await returnToSetting(tgBot, ctx);
+      await returnToSetting(tgBot, ctx, true);
     } else {
       await ctx.reply("🔒 Please enter your password to authenticate.");
     }
